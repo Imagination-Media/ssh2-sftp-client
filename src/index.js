@@ -450,7 +450,16 @@ class SftpClient {
               };
             });
             if (filter) {
-              resolve(newList.filter((item) => filter(item)));
+              if (typeof filter === 'string') {
+                let regex;
+                let newPattern = filter.replace(/\*([^*])*?/gi, '.*');
+                regex = new RegExp(newPattern);
+                resolve(newList.filter(item => regex.test(item.name)));
+              } else if (typeof filter === 'function') {
+                resolve(newList.filter((item) => filter(item)));
+              } else if (filter instanceof RegExp) {
+                resolve(newList.filter(item => filter.test(item.name)));
+              }
             } else {
               resolve(newList);
             }
